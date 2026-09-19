@@ -235,6 +235,26 @@
       color: var(--text-muted);
     }
 
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-edit {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--accent-blue);
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .btn-edit:hover {
+      background: rgba(88, 166, 255, 0.1);
+    }
+
     .btn-seen {
       background: var(--accent-green);
       color: #fff;
@@ -317,6 +337,27 @@
       outline: none;
     }
 
+    .api-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-fetch {
+      background: #1f6feb;
+      color: #fff;
+      border: none;
+      padding: 0 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .btn-fetch:hover {
+      opacity: 0.9;
+    }
+
     .modal-actions {
       display: flex;
       justify-content: flex-end;
@@ -358,26 +399,30 @@
     <div class="movies-grid" id="moviesGrid"></div>
   </div>
 
-  <!-- مودال ثبت در آرشیو -->
+  <!-- فرم ثبت یا ویرایش فیلم در آرشیو -->
   <div class="modal" id="addMovieModal">
     <div class="modal-content">
-      <h2>ثبت فیلم در آرشیو شخصی</h2>
+      <h2 id="modalTitle">ثبت فیلم در آرشیو شخصی</h2>
       <form id="vaultForm" onsubmit="saveDirectToVault(event)">
+        <input type="hidden" id="editMovieId">
         <div class="form-group">
-          <label>نام فیلم</label>
-          <input type="text" id="vTitle" required placeholder="عنوان فیلم">
+          <label>نام فیلم (انگلیسی برای جستجوی دقیق پوستر)</label>
+          <div class="api-input-group">
+            <input type="text" id="vTitle" required placeholder="مثال: Interstellar">
+            <button type="button" class="btn-fetch" onclick="fetchMovieDetails('v')">🔍 دریافت خودکار</button>
+          </div>
         </div>
         <div class="form-group">
           <label>کارگردان و سال ساخت</label>
           <input type="text" id="vDirector" required placeholder="کارگردان - سال ساخت">
         </div>
         <div class="form-group">
-          <label>لینک پوستر فیلم (URL اینترنتی)</label>
+          <label>لینک پوستر فیلم (URL)</label>
           <input type="url" id="vPoster" placeholder="آدرس تصویر پوستر">
         </div>
         <div class="form-group">
           <label>امتیاز شخصی شما (از ۱۰)</label>
-          <input type="number" id="vRating" min="1" max="10" step="0.5" placeholder="مثلاً: 9">
+          <input type="number" id="vRating" min="1" max="10" step="0.5" placeholder="مثلاً: 9.5">
         </div>
         <div class="form-group">
           <label>دیالوگ ماندگار یا یادداشت</label>
@@ -389,13 +434,13 @@
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="closeModal('addMovieModal')">انصراف</button>
-          <button type="submit" class="btn-action">ذخیره در آرشیو</button>
+          <button type="submit" class="btn-action" id="btnSaveVault">ذخیره در آرشیو</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- مودال ثبت پیشنهاد دوستان -->
+  <!-- فرم ثبت پیشنهاد دوستان -->
   <div class="modal" id="addFriendRecModal">
     <div class="modal-content">
       <h2>ثبت پیشنهاد دوستان</h2>
@@ -405,8 +450,11 @@
           <input type="text" id="fFriendName" required placeholder="نام دوست">
         </div>
         <div class="form-group">
-          <label>نام فیلم</label>
-          <input type="text" id="fTitle" required placeholder="عنوان فیلم">
+          <label>نام فیلم (انگلیسی برای جستجوی پوستر)</label>
+          <div class="api-input-group">
+            <input type="text" id="fTitle" required placeholder="مثال: Prisoners">
+            <button type="button" class="btn-fetch" onclick="fetchMovieDetails('f')">🔍 دریافت خودکار</button>
+          </div>
         </div>
         <div class="form-group">
           <label>کارگردان و سال ساخت</label>
@@ -429,7 +477,10 @@
   </div>
 
   <script>
-    // تنظیمات اختصاصی پروژه فایربیس
+    // کلید فعال‌شده OMDb شما
+    const OMDB_API_KEY = "ba5115ac";
+
+    // تنظیمات فایربیس
     const firebaseConfig = {
       apiKey: "AIzaSyBsu8JMHum33C-LUIZiTLO1v-D1qJJr1_Y",
       authDomain: "cinema-seyyed.firebaseapp.com",
@@ -459,34 +510,65 @@
       return false;
     }
 
+    async function fetchMovieDetails(prefix) {
+      const titleInput = document.getElementById(prefix + 'Title');
+      const title = titleInput.value.trim();
+      if (!title) {
+        alert("لطفاً ابتدا نام فیلم را وارد کنید.");
+        return;
+      }
+
+      const btn = event.target;
+      btn.innerText = "در حال دریافت...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+          document.getElementById(prefix + 'Director').value = `${data.Director} - ${data.Year}`;
+          if (data.Poster && data.Poster !== "N/A") {
+            document.getElementById(prefix + 'Poster').value = data.Poster;
+          }
+        } else {
+          alert("فیلمی با این نام در دیتابیس جهانی پیدا نشد.");
+        }
+      } catch (err) {
+        alert("خطا در برقراری ارتباط با دیتابیس OMDb.");
+      } finally {
+        btn.innerText = "🔍 دریافت خودکار";
+        btn.disabled = false;
+      }
+    }
+
     let vaultList = [];
     let friendsList = [];
     let imdbList = [];
 
     const defaultImdbMovies = [
-      { id: 1001, title: "The Shawshank Redemption", director: "Frank Darabont - 1994", poster: "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2MmI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.3", note: "رتبه ۱ تاریخ IMDb - شاهکاری درباره امید و استقامت انسانی" },
+      { id: 1001, title: "The Shawshank Redemption", director: "Frank Darabont - 1994", poster: "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2MmI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.3", note: "رتبه ۱ تاریخ IMDb - شاهکاری درباره امید و اراده" },
       { id: 1002, title: "The Godfather", director: "Francis Ford Coppola - 1972", poster: "https://m.media-amazon.com/images/M/MV5BYTJkNGQyZDgtZDQ0NC00MDM0LWEzZWQtYzUzZDEwMDUzZmM0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.2", note: "رتبه ۲ IMDb - کلاس درس سینما در روایت و بازیگری" },
-      { id: 1003, title: "The Dark Knight", director: "Christopher Nolan - 2008", poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg", rating: "9.0", note: "رتبه ۳ IMDb - نئو-نوآر مدرن و بازی فراموش‌نشدنی هیث لجر" },
+      { id: 1003, title: "The Dark Knight", director: "Christopher Nolan - 2008", poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg", rating: "9.0", note: "رتبه ۳ IMDb - نئو-نوآر مدرن و بازی جاودانه هیث لجر" },
       { id: 1004, title: "12 Angry Men", director: "Sidney Lumet - 1957", poster: "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTcgNDlmNy00MjM2LWIxOGYtYTZlMGQ1NmYxYzg5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.0", note: "رتبه ۵ IMDb - هنرنمایی دراماتیک در یک لوکیشن بسته" },
-      { id: 1005, title: "Pulp Fiction", director: "Quentin Tarantino - 1994", poster: "https://m.media-amazon.com/images/M/MV5BYTViYTE3NWMtNNTYyMS00NjM2LTljYjYtOWFkZjM2YTkzMjEzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.9", note: "رتبه ۸ IMDb - روایت پست‌مدرن و دیالوگ‌های به‌یادماندنی" },
-      { id: 1006, title: "Fight Club", director: "David Fincher - 1999", poster: "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmFkNjk2YzA4ZWI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.8", note: "رتبه ۱۲ IMDb - کاوش روان‌شناختی در هویت و جامعه مصرف‌زده" },
-      { id: 1007, title: "Goodfellas", director: "Martin Scorsese - 1990", poster: "https://m.media-amazon.com/images/M/MV5BN2E5NzI2ZGMtY2UxZS05ZTk5LThkMWUtNWQ4MmQ1ZWEwMWI5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۷ IMDb - تدوین پرشتاب و جریان‌ساز اسکورسیزی" },
-      { id: 1008, title: "One Flew Over the Cuckoo's Nest", director: "Miloš Forman - 1975", poster: "https://m.media-amazon.com/images/M/MV5BYmJmM2Q4NmMtYThmNC00ZjkyLWEwNmItYjkyNTIxOTA3OWE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۵ IMDb - شورش اراده انسانی در برابر ساختار سرکوب" },
-      { id: 1009, title: "Interstellar", director: "Christopher Nolan - 2014", poster: "https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۲۲ IMDb - پیوند فیزیک، زمان و احساسات انسانی" },
-      { id: 1010, title: "Se7en", director: "David Fincher - 1995", poster: "https://m.media-amazon.com/images/M/MV5BYTI4NWJhMDMtYjhhNi00NzFmLThkZGEtMmQ5MTg0YjFmYWYwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۱۹ IMDb - اتمسفر سنگین نئو-نوآر و شوک پایان داستان" },
-      { id: 1011, title: "The Silence of the Lambs", director: "Jonathan Demme - 1991", poster: "https://m.media-amazon.com/images/M/MV5BNjNhZTk0ZmEtNjJhMi00YzFlLWE1MmEtYzM1M2ZmMGMwMTU4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۲۱ IMDb - مطالعه عمیق تعلیق روان‌شناختی" },
-      { id: 1012, title: "Parasite", director: "Bong Joon-ho - 2019", poster: "https://m.media-amazon.com/images/M/MV5BYjk1N2VjZjAtNjA5Yy00OTcyLWE0YmEtOWY0Yjc0ZTlmYTNkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.5", note: "رتبه ۳۴ IMDb - کمدی سیاه و هوشمندانه تضاد طبقاتی" },
-      { id: 1013, title: "The Shining", director: "Stanley Kubrick - 1980", poster: "https://m.media-amazon.com/images/M/MV5BNmM2MWU5NzgtNmVhNC00Nzc2LWEwMmEtOTBlZGE3NzA5NGQxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.4", note: "رتبه ۵۸ IMDb - اوج معماری دلهره و جنون کوبریک" },
+      { id: 1005, title: "Pulp Fiction", director: "Quentin Tarantino - 1994", poster: "https://m.media-amazon.com/images/M/MV5BYTViYTE3NWMtNNTYyMS00NjM2LTljYjYtOWFkZjM2YTkzMjEzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.9", note: "رتبه ۸ IMDb - روایت پست‌مدرن و دیالوگ‌های افسانه‌ای" },
+      { id: 1006, title: "Fight Club", director: "David Fincher - 1999", poster: "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmFkNjk2YzA4ZWI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.8", note: "رتبه ۱۲ IMDb - کاوش روان‌شناختی در هویت و ساختار مدرن" },
+      { id: 1007, title: "Goodfellas", director: "Martin Scorsese - 1990", poster: "https://m.media-amazon.com/images/M/MV5BN2E5NzI2ZGMtY2UxZS05ZTk5LThkMWUtNWQ4MmQ1ZWEwMWI5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۷ IMDb - تدوین پرشتاب و نبض جریان‌ساز اسکورسیزی" },
+      { id: 1008, title: "One Flew Over the Cuckoo's Nest", director: "Miloš Forman - 1975", poster: "https://m.media-amazon.com/images/M/MV5BYmJmM2Q4NmMtYThmNC00ZjkyLWEwNmItYjkyNTIxOTA3OWE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۵ IMDb - نماد اراده انسانی در برابر ساختار سرکوب" },
+      { id: 1009, title: "Interstellar", director: "Christopher Nolan - 2014", poster: "https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۲۲ IMDb - پیوند فیزیک، زمان و عاطفه انسانی" },
+      { id: 1010, title: "Se7en", director: "David Fincher - 1995", poster: "https://m.media-amazon.com/images/M/MV5BYTI4NWJhMDMtYjhhNi00NzFmLThkZGEtMmQ5MTg0YjFmYWYwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۱۹ IMDb - تاریک‌ترین اتمسفر جنایی تاریخ سینما" },
+      { id: 1011, title: "The Silence of the Lambs", director: "Jonathan Demme - 1991", poster: "https://m.media-amazon.com/images/M/MV5BNjNhZTk0ZmEtNjJhMi00YzFlLWE1MmEtYzM1M2ZmMGMwMTU4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۲۱ IMDb - مطالعه عمیق تعلیق و روان‌شناسی جنایی" },
+      { id: 1012, title: "Parasite", director: "Bong Joon-ho - 2019", poster: "https://m.media-amazon.com/images/M/MV5BYjk1N2VjZjAtNjA5Yy00OTcyLWE0YmEtOWY0Yjc0ZTlmYTNkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.5", note: "رتبه ۳۴ IMDb - کمدی سیاه هوشمندانه و نمادین" },
+      { id: 1013, title: "The Shining", director: "Stanley Kubrick - 1980", poster: "https://m.media-amazon.com/images/M/MV5BNmM2MWU5NzgtNmVhNC00Nzc2LWEwMmEtOTBlZGE3NzA5NGQxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.4", note: "رتبه ۵۸ IMDb - هندسه دلهره، تنهایی و جنون کوبریک" },
       { id: 1014, title: "Taxi Driver", director: "Martin Scorsese - 1976", poster: "https://m.media-amazon.com/images/M/MV5BZWFlYmY2MGEtZjVkYS00YzU4LTg0YjQtYzY1ZGE3NTA5NGQxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.2", note: "رتبه ۱۱۲ IMDb - شاهکار بی‌بدیل انزوای شهری" },
       { id: 1015, title: "Memories of Murder", director: "Bong Joon-ho - 2003", poster: "https://m.media-amazon.com/images/M/MV5BOGViNTg4YTktYTQ2Ni00MTU0LTk2NWUtMTI4OTc1YTM0NzQ2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.1", note: "رتبه ۱۶۰ IMDb - برترین اثر معمایی و نئو-نوآر سینمای آسیا" },
       { id: 1016, title: "Prisoners", director: "Denis Villeneuve - 2013", poster: "https://m.media-amazon.com/images/M/MV5BMTg0NTIzMjQ1NV5BMl5BanBnXkFtZTcwNDc3ODYxOQ@@._V1_FMjpg_UX1000_.jpg", rating: "8.2", note: "رتبه ۱۸۵ IMDb - تریلر معمایی در اوج تنش اخلاقی" },
-      { id: 1017, title: "Blade Runner 2049", director: "Denis Villeneuve - 2017", poster: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "شاهکار اتمسفریک و بصری تاریخ سینمای سایبرپانک" },
-      { id: 1018, title: "8½", director: "Federico Fellini - 1963", poster: "https://m.media-amazon.com/images/M/MV5BOTQ1NTY1MTMtYzU1YS00YWZkLWFkZjItMWYxMDUzNmMxOTU1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "تجربه سورئال از بن‌بست فکری و جریان ناخودآگاه" }
+      { id: 1017, title: "Blade Runner 2049", director: "Denis Villeneuve - 2017", poster: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "شاهکار اتمسفریک و بصری تاریخ سایبرپانک" },
+      { id: 1018, title: "8½", director: "Federico Fellini - 1963", poster: "https://m.media-amazon.com/images/M/MV5BOTQ1NTY1MTMtYzU1YS00YWZkLWFkZjItMWYxMDUzNmMxOTU1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "تجربه سورئال از بن‌بست فکری و ناخودآگاه" }
     ];
 
     let currentTab = 'vault';
 
-    // همگام‌سازی لحظه‌ای با فایربیس
     db.ref('vault').on('value', snap => {
       const val = snap.val();
       vaultList = val ? Object.values(val) : [];
@@ -542,7 +624,10 @@
           if (m.quote) middleContent = `<div class="quote-box">«${m.quote}»</div>`;
           footerContent = `
             <span>🗄️ ${m.storage || 'ثبت نشده'}</span>
-            <button class="btn-delete" onclick="deleteFromVault('${m.id}')">حذف</button>
+            <div class="card-actions">
+              <button class="btn-edit" onclick="openEditMovieModal('${m.id}')">✏️ ویرایش</button>
+              <button class="btn-delete" onclick="deleteFromVault('${m.id}')">حذف</button>
+            </div>
           `;
         } else if (type === 'friends') {
           middleContent = `
@@ -662,6 +747,28 @@
 
     function openAddMovieModal() {
       if (!ensureAuthenticated()) return;
+      document.getElementById('editMovieId').value = "";
+      document.getElementById('modalTitle').innerText = "ثبت فیلم در آرشیو شخصی";
+      document.getElementById('btnSaveVault').innerText = "ذخیره در آرشیو";
+      document.getElementById('vaultForm').reset();
+      document.getElementById('addMovieModal').style.display = 'flex';
+    }
+
+    function openEditMovieModal(id) {
+      if (!ensureAuthenticated()) return;
+      const movie = vaultList.find(m => String(m.id) === String(id));
+      if (!movie) return;
+
+      document.getElementById('editMovieId').value = movie.id;
+      document.getElementById('vTitle').value = movie.title || "";
+      document.getElementById('vDirector').value = movie.director || "";
+      document.getElementById('vPoster').value = movie.poster || "";
+      document.getElementById('vRating').value = movie.rating || "";
+      document.getElementById('vQuote').value = movie.quote || "";
+      document.getElementById('vStorage').value = movie.storage || "";
+
+      document.getElementById('modalTitle').innerText = "ویرایش فیلم در آرشیو";
+      document.getElementById('btnSaveVault').innerText = "بروزرسانی تغییرات";
       document.getElementById('addMovieModal').style.display = 'flex';
     }
 
@@ -678,9 +785,11 @@
 
     function saveDirectToVault(e) {
       e.preventDefault();
-      const newId = Date.now();
-      const newItem = {
-        id: newId,
+      const editId = document.getElementById('editMovieId').value;
+      const targetId = editId ? editId : Date.now();
+
+      const itemData = {
+        id: targetId,
         title: document.getElementById('vTitle').value,
         director: document.getElementById('vDirector').value,
         poster: document.getElementById('vPoster').value,
@@ -689,7 +798,7 @@
         storage: document.getElementById('vStorage').value
       };
 
-      db.ref('vault/' + newId).set(newItem);
+      db.ref('vault/' + targetId).set(itemData);
       closeModal('addMovieModal');
       if (currentTab !== 'vault') switchTab('vault');
     }
