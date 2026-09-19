@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سینماتک و دفترچه فیلم من | Cinema Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- کتابخانه‌های فایربیس -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0e1117;
+      --card-bg: #161b22;
+      --border-color: #30363d;
+      --accent: #e50914;
+      --accent-gold: #f5c518;
+      --accent-green: #238636;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent-blue: #58a6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--text-main);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn-action.btn-secondary {
+      background: #21262d;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-action:hover {
+      opacity: 0.85;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .movie-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .poster-container {
+      width: 100%;
+      height: 370px;
+      background: #21262d;
+      overflow: hidden;
+    }
+
+    .poster-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 8px;
+    }
+
+    .movie-title-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .movie-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .rating-badge {
+      background: rgba(245, 197, 24, 0.15);
+      color: var(--accent-gold);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .movie-director {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .quote-box {
+      font-size: 0.88rem;
+      color: #c9d1d9;
+      font-style: italic;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px;
+      border-right: 3px solid var(--accent);
+      border-radius: 4px;
+      margin-top: auto;
+    }
+
+    .friend-box {
+      font-size: 0.85rem;
+      color: #58a6ff;
+      background: rgba(88, 166, 255, 0.08);
+      padding: 8px;
+      border-right: 3px solid var(--accent-blue);
+      border-radius: 4px;
+      margin-top: auto;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .btn-seen {
+      background: var(--accent-green);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn-seen:hover {
+      opacity: 0.85;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #f85149;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🎬 سینماتک شخصی</h1>
+      <div class="header-actions">
+        <button class="btn-action" onclick="openAddMovieModal()">+ ثبت در آرشیو</button>
+        <button class="btn-action btn-secondary" onclick="openAddFriendRecModal()">+ پیشنهاد جدید رفقا</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tabVault" onclick="switchTab('vault')">📁 آرشیو فیلم‌های من</button>
+      <button class="tab-btn" id="tabFriends" onclick="switchTab('friends')">👥 پیشنهادات دوستان</button>
+      <button class="tab-btn" id="tabImdb" onclick="switchTab('imdb')">🌟 پیشنهادات برتر IMDb</button>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="searchBox" class="search-input" placeholder="جستجو بر اساس عنوان فیلم، کارگردان یا یادداشت..." oninput="filterCurrentView()">
+    </div>
+
+    <div class="movies-grid" id="moviesGrid"></div>
+  </div>
+
+  <!-- مودال ثبت در آرشیو -->
+  <div class="modal" id="addMovieModal">
+    <div class="modal-content">
+      <h2>ثبت فیلم در آرشیو شخصی</h2>
+      <form id="vaultForm" onsubmit="saveDirectToVault(event)">
+        <div class="form-group">
+          <label>نام فیلم</label>
+          <input type="text" id="vTitle" required placeholder="عنوان فیلم">
+        </div>
+        <div class="form-group">
+          <label>کارگردان و سال ساخت</label>
+          <input type="text" id="vDirector" required placeholder="کارگردان - سال ساخت">
+        </div>
+        <div class="form-group">
+          <label>لینک پوستر فیلم (URL اینترنتی)</label>
+          <input type="url" id="vPoster" placeholder="آدرس تصویر پوستر">
+        </div>
+        <div class="form-group">
+          <label>امتیاز شخصی شما (از ۱۰)</label>
+          <input type="number" id="vRating" min="1" max="10" step="0.5" placeholder="مثلاً: 9">
+        </div>
+        <div class="form-group">
+          <label>دیالوگ ماندگار یا یادداشت</label>
+          <textarea id="vQuote" rows="3" placeholder="یادداشت یا دیالوگ ماندگار..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>محل ذخیره / نسخه فیلم</label>
+          <input type="text" id="vStorage" placeholder="مثلاً: هارد اصلی / 1080p">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal('addMovieModal')">انصراف</button>
+          <button type="submit" class="btn-action">ذخیره در آرشیو</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- مودال ثبت پیشنهاد دوستان -->
+  <div class="modal" id="addFriendRecModal">
+    <div class="modal-content">
+      <h2>ثبت پیشنهاد دوستان</h2>
+      <form id="friendForm" onsubmit="saveFriendRec(event)">
+        <div class="form-group">
+          <label>نام پیشنهاددهنده</label>
+          <input type="text" id="fFriendName" required placeholder="نام دوست">
+        </div>
+        <div class="form-group">
+          <label>نام فیلم</label>
+          <input type="text" id="fTitle" required placeholder="عنوان فیلم">
+        </div>
+        <div class="form-group">
+          <label>کارگردان و سال ساخت</label>
+          <input type="text" id="fDirector" required placeholder="کارگردان - سال ساخت">
+        </div>
+        <div class="form-group">
+          <label>لینک پوستر فیلم (اختیاری)</label>
+          <input type="url" id="fPoster" placeholder="آدرس تصویر پوستر">
+        </div>
+        <div class="form-group">
+          <label>دلیل پیشنهاد یا توضیح</label>
+          <textarea id="fNote" rows="2" placeholder="توضیح کوتاه درباره پیشنهاد..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal('addFriendRecModal')">انصراف</button>
+          <button type="submit" class="btn-action">ثبت پیشنهاد</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // تنظیمات اختصاصی پروژه فایربیس
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsu8JMHum33C-LUIZiTLO1v-D1qJJr1_Y",
+      authDomain: "cinema-seyyed.firebaseapp.com",
+      databaseURL: "https://cinema-seyyed-default-rtdb.firebaseio.com",
+      projectId: "cinema-seyyed",
+      storageBucket: "cinema-seyyed.firebasestorage.app",
+      messagingSenderId: "337880714768",
+      appId: "1:337880714768:web:d3e7cc2c5b14712614c495",
+      measurementId: "G-LTB8ZNCH8T"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const SECRET_KEY = "007";
+
+    function ensureAuthenticated() {
+      if (sessionStorage.getItem('cinema_authenticated') === 'true') {
+        return true;
+      }
+      const pass = prompt("لطفاً رمز عبور را وارد کنید:");
+      if (pass === SECRET_KEY) {
+        sessionStorage.setItem('cinema_authenticated', 'true');
+        return true;
+      }
+      alert("رمز عبور اشتباه است!");
+      return false;
+    }
+
+    let vaultList = [];
+    let friendsList = [];
+    let imdbList = [];
+
+    const defaultImdbMovies = [
+      { id: 1001, title: "The Shawshank Redemption", director: "Frank Darabont - 1994", poster: "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2MmI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.3", note: "رتبه ۱ تاریخ IMDb - شاهکاری درباره امید و استقامت انسانی" },
+      { id: 1002, title: "The Godfather", director: "Francis Ford Coppola - 1972", poster: "https://m.media-amazon.com/images/M/MV5BYTJkNGQyZDgtZDQ0NC00MDM0LWEzZWQtYzUzZDEwMDUzZmM0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.2", note: "رتبه ۲ IMDb - کلاس درس سینما در روایت و بازیگری" },
+      { id: 1003, title: "The Dark Knight", director: "Christopher Nolan - 2008", poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg", rating: "9.0", note: "رتبه ۳ IMDb - نئو-نوآر مدرن و بازی فراموش‌نشدنی هیث لجر" },
+      { id: 1004, title: "12 Angry Men", director: "Sidney Lumet - 1957", poster: "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTcgNDlmNy00MjM2LWIxOGYtYTZlMGQ1NmYxYzg5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "9.0", note: "رتبه ۵ IMDb - هنرنمایی دراماتیک در یک لوکیشن بسته" },
+      { id: 1005, title: "Pulp Fiction", director: "Quentin Tarantino - 1994", poster: "https://m.media-amazon.com/images/M/MV5BYTViYTE3NWMtNNTYyMS00NjM2LTljYjYtOWFkZjM2YTkzMjEzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.9", note: "رتبه ۸ IMDb - روایت پست‌مدرن و دیالوگ‌های به‌یادماندنی" },
+      { id: 1006, title: "Fight Club", director: "David Fincher - 1999", poster: "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmFkNjk2YzA4ZWI0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.8", note: "رتبه ۱۲ IMDb - کاوش روان‌شناختی در هویت و جامعه مصرف‌زده" },
+      { id: 1007, title: "Goodfellas", director: "Martin Scorsese - 1990", poster: "https://m.media-amazon.com/images/M/MV5BN2E5NzI2ZGMtY2UxZS05ZTk5LThkMWUtNWQ4MmQ1ZWEwMWI5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۷ IMDb - تدوین پرشتاب و جریان‌ساز اسکورسیزی" },
+      { id: 1008, title: "One Flew Over the Cuckoo's Nest", director: "Miloš Forman - 1975", poster: "https://m.media-amazon.com/images/M/MV5BYmJmM2Q4NmMtYThmNC00ZjkyLWEwNmItYjkyNTIxOTA3OWE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۱۵ IMDb - شورش اراده انسانی در برابر ساختار سرکوب" },
+      { id: 1009, title: "Interstellar", director: "Christopher Nolan - 2014", poster: "https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.7", note: "رتبه ۲۲ IMDb - پیوند فیزیک، زمان و احساسات انسانی" },
+      { id: 1010, title: "Se7en", director: "David Fincher - 1995", poster: "https://m.media-amazon.com/images/M/MV5BYTI4NWJhMDMtYjhhNi00NzFmLThkZGEtMmQ5MTg0YjFmYWYwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۱۹ IMDb - اتمسفر سنگین نئو-نوآر و شوک پایان داستان" },
+      { id: 1011, title: "The Silence of the Lambs", director: "Jonathan Demme - 1991", poster: "https://m.media-amazon.com/images/M/MV5BNjNhZTk0ZmEtNjJhMi00YzFlLWE1MmEtYzM1M2ZmMGMwMTU4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.6", note: "رتبه ۲۱ IMDb - مطالعه عمیق تعلیق روان‌شناختی" },
+      { id: 1012, title: "Parasite", director: "Bong Joon-ho - 2019", poster: "https://m.media-amazon.com/images/M/MV5BYjk1N2VjZjAtNjA5Yy00OTcyLWE0YmEtOWY0Yjc0ZTlmYTNkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.5", note: "رتبه ۳۴ IMDb - کمدی سیاه و هوشمندانه تضاد طبقاتی" },
+      { id: 1013, title: "The Shining", director: "Stanley Kubrick - 1980", poster: "https://m.media-amazon.com/images/M/MV5BNmM2MWU5NzgtNmVhNC00Nzc2LWEwMmEtOTBlZGE3NzA5NGQxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.4", note: "رتبه ۵۸ IMDb - اوج معماری دلهره و جنون کوبریک" },
+      { id: 1014, title: "Taxi Driver", director: "Martin Scorsese - 1976", poster: "https://m.media-amazon.com/images/M/MV5BZWFlYmY2MGEtZjVkYS00YzU4LTg0YjQtYzY1ZGE3NTA5NGQxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.2", note: "رتبه ۱۱۲ IMDb - شاهکار بی‌بدیل انزوای شهری" },
+      { id: 1015, title: "Memories of Murder", director: "Bong Joon-ho - 2003", poster: "https://m.media-amazon.com/images/M/MV5BOGViNTg4YTktYTQ2Ni00MTU0LTk2NWUtMTI4OTc1YTM0NzQ2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.1", note: "رتبه ۱۶۰ IMDb - برترین اثر معمایی و نئو-نوآر سینمای آسیا" },
+      { id: 1016, title: "Prisoners", director: "Denis Villeneuve - 2013", poster: "https://m.media-amazon.com/images/M/MV5BMTg0NTIzMjQ1NV5BMl5BanBnXkFtZTcwNDc3ODYxOQ@@._V1_FMjpg_UX1000_.jpg", rating: "8.2", note: "رتبه ۱۸۵ IMDb - تریلر معمایی در اوج تنش اخلاقی" },
+      { id: 1017, title: "Blade Runner 2049", director: "Denis Villeneuve - 2017", poster: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "شاهکار اتمسفریک و بصری تاریخ سینمای سایبرپانک" },
+      { id: 1018, title: "8½", director: "Federico Fellini - 1963", poster: "https://m.media-amazon.com/images/M/MV5BOTQ1NTY1MTMtYzU1YS00YWZkLWFkZjItMWYxMDUzNmMxOTU1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg", rating: "8.0", note: "تجربه سورئال از بن‌بست فکری و جریان ناخودآگاه" }
+    ];
+
+    let currentTab = 'vault';
+
+    // همگام‌سازی لحظه‌ای با فایربیس
+    db.ref('vault').on('value', snap => {
+      const val = snap.val();
+      vaultList = val ? Object.values(val) : [];
+      filterCurrentView();
+    });
+
+    db.ref('friends').on('value', snap => {
+      const val = snap.val();
+      friendsList = val ? Object.values(val) : [];
+      filterCurrentView();
+    });
+
+    db.ref('imdb').on('value', snap => {
+      const val = snap.val();
+      if (!val) {
+        defaultImdbMovies.forEach(m => db.ref('imdb/' + m.id).set(m));
+      } else {
+        imdbList = Object.values(val);
+        filterCurrentView();
+      }
+    });
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabVault').classList.toggle('active', tab === 'vault');
+      document.getElementById('tabFriends').classList.toggle('active', tab === 'friends');
+      document.getElementById('tabImdb').classList.toggle('active', tab === 'imdb');
+      document.getElementById('searchBox').value = '';
+      filterCurrentView();
+    }
+
+    function renderCards(list, type) {
+      const grid = document.getElementById('moviesGrid');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        let msg = 'فیلمی در این بخش ثبت نشده است.';
+        if (type === 'vault') msg = 'هنوز فیلمی در آرشیو ثبت نشده است.';
+        if (type === 'friends') msg = 'لیست پیشنهادات دوستان خالی است.';
+        grid.innerHTML = `<div class="empty-state">${msg}</div>`;
+        return;
+      }
+
+      list.forEach(m => {
+        const posterImg = m.poster || 'https://via.placeholder.com/300x450/161b22/8b949e?text=No+Poster';
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+
+        let middleContent = '';
+        let footerContent = '';
+
+        if (type === 'vault') {
+          if (m.quote) middleContent = `<div class="quote-box">«${m.quote}»</div>`;
+          footerContent = `
+            <span>🗄️ ${m.storage || 'ثبت نشده'}</span>
+            <button class="btn-delete" onclick="deleteFromVault('${m.id}')">حذف</button>
+          `;
+        } else if (type === 'friends') {
+          middleContent = `
+            <div class="friend-box">
+              <strong>پیشنهاد از: ${m.friend}</strong><br>
+              <span>${m.note || 'بدون توضیح'}</span>
+            </div>
+          `;
+          footerContent = `
+            <button class="btn-delete" onclick="deleteFriendRec('${m.id}')">حذف</button>
+            <button class="btn-seen" onclick="markAsSeenFromFriends('${m.id}')">✓ دیدم! رفت به آرشیو</button>
+          `;
+        } else if (type === 'imdb') {
+          if (m.note) middleContent = `<div class="quote-box" style="border-right-color: var(--accent-gold);">${m.note}</div>`;
+          footerContent = `
+            <button class="btn-delete" onclick="deleteImdbRec('${m.id}')">حذف</button>
+            <button class="btn-seen" onclick="markAsSeenFromImdb('${m.id}')">✓ دیدم! رفت به آرشیو</button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="poster-container">
+            <img src="${posterImg}" alt="${m.title}" loading="lazy">
+          </div>
+          <div class="card-body">
+            <div class="movie-title-wrap">
+              <span class="movie-title">${m.title}</span>
+              ${m.rating ? `<span class="rating-badge">★ ${m.rating}</span>` : ''}
+            </div>
+            <div class="movie-director">${m.director}</div>
+            ${middleContent}
+            <div class="card-footer">
+              ${footerContent}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function markAsSeenFromFriends(id) {
+      if (!ensureAuthenticated()) return;
+      const movie = friendsList.find(m => String(m.id) === String(id));
+      if (!movie) return;
+
+      const rating = prompt(`فیلم "${movie.title}" را دیدید! امتیاز شخصی شما (از ۱۰):`, "8.5");
+      const userQuote = prompt(`دیالوگ یا نظر شما:`, `پیشنهاد از: ${movie.friend}`);
+      const storage = prompt(`محل ذخیره / نسخه فیلم:`, "هارد اصلی");
+
+      const newId = Date.now();
+      const newVaultItem = {
+        id: newId,
+        title: movie.title,
+        director: movie.director,
+        poster: movie.poster || "",
+        rating: rating || "8.0",
+        quote: userQuote || "",
+        storage: storage || "ثبت نشده"
+      };
+
+      db.ref('vault/' + newId).set(newVaultItem);
+      db.ref('friends/' + id).remove();
+      alert(`«${movie.title}» با موفقیت به آرشیو فیلم‌های شما اضافه شد.`);
+    }
+
+    function markAsSeenFromImdb(id) {
+      if (!ensureAuthenticated()) return;
+      const movie = imdbList.find(m => String(m.id) === String(id));
+      if (!movie) return;
+
+      const rating = prompt(`فیلم "${movie.title}" را دیدید! امتیاز شخصی شما (از ۱۰):`, movie.rating || "8.5");
+      const userQuote = prompt(`دیالوگ یا یادداشت شما:`, movie.note || "");
+      const storage = prompt(`محل ذخیره در آرشیو:`, "هارد اصلی");
+
+      const newId = Date.now();
+      const newVaultItem = {
+        id: newId,
+        title: movie.title,
+        director: movie.director,
+        poster: movie.poster || "",
+        rating: rating || movie.rating,
+        quote: userQuote || "",
+        storage: storage || "ثبت نشده"
+      };
+
+      db.ref('vault/' + newId).set(newVaultItem);
+      db.ref('imdb/' + id).remove();
+      alert(`«${movie.title}» به آرشیو فیلم‌های شما اضافه شد.`);
+    }
+
+    function filterCurrentView() {
+      const q = (document.getElementById('searchBox').value || '').toLowerCase();
+      if (currentTab === 'vault') {
+        const filtered = vaultList.filter(m => 
+          (m.title && m.title.toLowerCase().includes(q)) || 
+          (m.director && m.director.toLowerCase().includes(q)) ||
+          (m.quote && m.quote.toLowerCase().includes(q))
+        );
+        renderCards(filtered, 'vault');
+      } else if (currentTab === 'friends') {
+        const filtered = friendsList.filter(m => 
+          (m.title && m.title.toLowerCase().includes(q)) || 
+          (m.director && m.director.toLowerCase().includes(q)) ||
+          (m.friend && m.friend.toLowerCase().includes(q)) ||
+          (m.note && m.note.toLowerCase().includes(q))
+        );
+        renderCards(filtered, 'friends');
+      } else if (currentTab === 'imdb') {
+        const filtered = imdbList.filter(m => 
+          (m.title && m.title.toLowerCase().includes(q)) || 
+          (m.director && m.director.toLowerCase().includes(q)) ||
+          (m.note && m.note.toLowerCase().includes(q))
+        );
+        renderCards(filtered, 'imdb');
+      }
+    }
+
+    function openAddMovieModal() {
+      if (!ensureAuthenticated()) return;
+      document.getElementById('addMovieModal').style.display = 'flex';
+    }
+
+    function openAddFriendRecModal() {
+      if (!ensureAuthenticated()) return;
+      document.getElementById('addFriendRecModal').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      if (id === 'addMovieModal') document.getElementById('vaultForm').reset();
+      if (id === 'addFriendRecModal') document.getElementById('friendForm').reset();
+    }
+
+    function saveDirectToVault(e) {
+      e.preventDefault();
+      const newId = Date.now();
+      const newItem = {
+        id: newId,
+        title: document.getElementById('vTitle').value,
+        director: document.getElementById('vDirector').value,
+        poster: document.getElementById('vPoster').value,
+        rating: document.getElementById('vRating').value,
+        quote: document.getElementById('vQuote').value,
+        storage: document.getElementById('vStorage').value
+      };
+
+      db.ref('vault/' + newId).set(newItem);
+      closeModal('addMovieModal');
+      if (currentTab !== 'vault') switchTab('vault');
+    }
+
+    function saveFriendRec(e) {
+      e.preventDefault();
+      const newId = Date.now();
+      const newItem = {
+        id: newId,
+        friend: document.getElementById('fFriendName').value,
+        title: document.getElementById('fTitle').value,
+        director: document.getElementById('fDirector').value,
+        poster: document.getElementById('fPoster').value,
+        note: document.getElementById('fNote').value
+      };
+
+      db.ref('friends/' + newId).set(newItem);
+      closeModal('addFriendRecModal');
+      if (currentTab !== 'friends') switchTab('friends');
+    }
+
+    function deleteFromVault(id) {
+      if (!ensureAuthenticated()) return;
+      if (confirm('آیا از حذف این فیلم از آرشیو مطمئن هستید؟')) {
+        db.ref('vault/' + id).remove();
+      }
+    }
+
+    function deleteFriendRec(id) {
+      if (!ensureAuthenticated()) return;
+      if (confirm('این پیشنهاد حذف شود؟')) {
+        db.ref('friends/' + id).remove();
+      }
+    }
+
+    function deleteImdbRec(id) {
+      if (!ensureAuthenticated()) return;
+      if (confirm('این عنوان از لیست پیشنهادات حذف شود؟')) {
+        db.ref('imdb/' + id).remove();
+      }
+    }
+  </script>
+</body>
+</html>
