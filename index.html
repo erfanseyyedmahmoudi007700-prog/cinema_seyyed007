@@ -23,520 +23,170 @@
       --danger: #ef4444;
       --success: #10b981;
       --friend-badge: #8b5cf6;
+      --top-rating: #eab308;
       --imdb-yellow: #f5c518;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Vazirmatn', sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
     header {
-      background: rgba(21, 26, 35, 0.85);
+      background: rgba(21, 26, 35, 0.9);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--card-border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      position: sticky; top: 0; z-index: 50;
       padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 12px;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
 
     .btn {
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      background: var(--accent); color: #0f172a; border: none;
+      padding: 10px 18px; border-radius: 8px; font-size: 0.95rem;
+      font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
       transition: all 0.2s ease;
     }
-
-    .btn:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-    }
+    .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
     .btn-imdb {
-      background: var(--imdb-yellow);
-      color: #000;
-      font-weight: 800;
-      padding: 0 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      white-space: nowrap;
-      transition: opacity 0.2s;
+      background: var(--imdb-yellow); color: #000; font-weight: 800;
+      padding: 0 16px; border: none; border-radius: 8px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; white-space: nowrap;
     }
+    .btn-imdb:hover { opacity: 0.9; }
 
-    .btn-imdb:hover {
-      opacity: 0.9;
+    .btn-secondary { background: #1e293b; color: var(--text-main); border: 1px solid var(--card-border); }
+    .btn-secondary:hover { background: #334155; }
+
+    .btn-icon {
+      background: #151a23; border: 1px solid var(--card-border); color: var(--text-muted);
+      width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: all 0.2s;
     }
+    .btn-icon:hover { color: var(--danger); border-color: var(--danger); }
 
-    .btn-secondary {
-      background: #1e293b;
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px 20px; width: 100%; flex: 1; }
 
-    .btn-secondary:hover {
-      background: #334155;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px 20px;
-      width: 100%;
-      flex: 1;
-    }
-
-    .view-tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 12px;
-    }
-
+    .view-tabs { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; flex-wrap: wrap; }
     .tab-btn {
-      background: #101520;
-      color: var(--text-muted);
-      border: 1px solid var(--card-border);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
+      background: #101520; color: var(--text-muted); border: 1px solid var(--card-border);
+      padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; transition: all 0.2s;
     }
+    .tab-btn.active { background: var(--card-bg); color: var(--accent); border-color: var(--accent); }
+    .tab-btn.tab-top.active { color: var(--top-rating); border-color: var(--top-rating); }
 
-    .tab-btn.active {
-      background: var(--card-bg);
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 14px 18px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      padding: 14px 18px; border-radius: 10px; display: flex; align-items: center; gap: 14px;
     }
-
-    .stat-card i {
-      font-size: 1.8rem;
-      color: var(--accent);
-    }
-
-    .stat-info div:first-child {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .stat-info div:last-child {
-      font-size: 1.25rem;
-      font-weight: bold;
-    }
+    .stat-card i { font-size: 1.8rem; color: var(--accent); }
+    .stat-info div:first-child { font-size: 0.8rem; color: var(--text-muted); }
+    .stat-info div:last-child { font-size: 1.25rem; font-weight: bold; }
 
     .controls-panel {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: center;
-      justify-content: space-between;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
     }
 
-    .search-box {
-      flex: 1;
-      min-width: 260px;
-      position: relative;
-    }
-
-    .search-box i {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
+    .search-box { flex: 1; min-width: 260px; position: relative; }
+    .search-box i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
     .search-box input {
-      width: 100%;
-      padding: 10px 42px 10px 14px;
-      background: #0f141c;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 0.95rem;
-      outline: none;
+      width: 100%; padding: 10px 42px 10px 14px; background: #0f141c;
+      border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none;
     }
+    .search-box input:focus { border-color: var(--accent); }
 
-    .search-box input:focus {
-      border-color: var(--accent);
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
+    .filter-group { display: flex; gap: 10px; flex-wrap: wrap; }
     select {
-      background: #0f141c;
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      outline: none;
-      cursor: pointer;
+      background: #0f141c; border: 1px solid var(--card-border); color: var(--text-main);
+      padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none; cursor: pointer;
     }
 
-    .movies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 22px;
-    }
-
+    .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; }
     .movie-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
       transition: transform 0.2s, box-shadow 0.2s;
     }
+    .movie-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4); border-color: #3b4759; }
 
-    .movie-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-      border-color: #3b4759;
-    }
+    .poster-box { width: 100%; height: 330px; position: relative; background: #111620; overflow: hidden; }
+    .poster-box img { width: 100%; height: 100%; object-fit: cover; }
+    .poster-fallback { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 8px; }
 
-    .poster-box {
-      width: 100%;
-      height: 330px;
-      position: relative;
-      background: #111620;
-      overflow: hidden;
-    }
-
-    .poster-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s;
-    }
-
-    .movie-card:hover .poster-box img {
-      transform: scale(1.04);
-    }
-
-    .poster-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      gap: 8px;
-    }
-
-    .badge-status {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
-    }
-
+    .badge-status { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; backdrop-filter: blur(8px); }
     .badge-friend {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: rgba(139, 92, 246, 0.85);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      position: absolute; bottom: 12px; right: 12px; background: rgba(139, 92, 246, 0.85);
+      color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+      backdrop-filter: blur(8px); display: flex; align-items: center; gap: 5px;
+    }
+    .badge-ten {
+      position: absolute; top: 12px; right: 12px; background: rgba(234, 179, 8, 0.9);
+      color: #000; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 4px;
     }
 
-    .status-watched {
-      background: rgba(16, 185, 129, 0.85);
-      color: #fff;
-    }
+    .status-watched { background: rgba(16, 185, 129, 0.85); color: #fff; }
+    .status-plan { background: rgba(229, 153, 52, 0.85); color: #000; }
 
-    .status-plan {
-      background: rgba(229, 153, 52, 0.85);
-      color: #000;
-    }
-
-    .movie-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      gap: 6px;
-    }
-
-    .movie-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .movie-director {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .movie-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 6px;
-      font-size: 0.85rem;
-    }
-
-    .rating-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #f59e0b;
-      font-weight: bold;
-    }
-
+    .movie-body { padding: 16px; display: flex; flex-direction: column; flex: 1; gap: 6px; }
+    .movie-title { font-size: 1.1rem; font-weight: 700; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .movie-director { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .movie-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 0.85rem; }
+    .rating-badge { display: inline-flex; align-items: center; gap: 4px; color: #f59e0b; font-weight: bold; }
+    .rating-badge.is-perfect { color: #eab308; background: rgba(234, 179, 8, 0.15); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(234, 179, 8, 0.4); }
     .movie-notes {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 8px;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 8px;
+      font-size: 0.8rem; color: #94a3b8; margin-top: 8px; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;
     }
 
     .card-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 10px 16px;
-      background: rgba(0, 0, 0, 0.2);
-      border-top: 1px solid var(--card-border);
+      display: flex; justify-content: flex-end; gap: 8px; padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.2); border-top: 1px solid var(--card-border);
     }
-
-    .action-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.95rem;
-      padding: 6px;
-      border-radius: 4px;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .action-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .action-btn.delete:hover {
-      color: var(--danger);
-    }
+    .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.95rem; padding: 6px; border-radius: 4px; }
+    .action-btn:hover { color: var(--text-main); }
+    .action-btn.delete:hover { color: var(--danger); }
 
     .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 16px;
     }
-
     .modal {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      width: 100%;
-      max-width: 520px;
-      overflow: hidden;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 14px; width: 100%; max-width: 520px; overflow: hidden;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      animation: popIn 0.2s ease-out;
     }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 1.15rem; color: var(--accent); }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+    .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; max-height: 75vh; overflow-y: auto; }
 
-    @keyframes popIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .modal-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h3 {
-      font-size: 1.15rem;
-      color: var(--accent);
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-
-    .modal-body {
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-height: 75vh;
-      overflow-y: auto;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
     .form-group input, .form-group textarea, .form-group select {
-      background: #0d1219;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text-main);
-      outline: none;
+      background: #0d1219; border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 10px 14px; color: var(--text-main); outline: none;
     }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
 
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      border-color: var(--accent);
-    }
-
-    .input-with-btn {
-      display: flex;
-      gap: 8px;
-    }
-
-    .input-with-btn input {
-      flex: 1;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    .input-with-btn { display: flex; gap: 8px; }
+    .input-with-btn input { flex: 1; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      background: rgba(0, 0, 0, 0.15);
+      padding: 16px 24px; border-top: 1px solid var(--card-border);
+      display: flex; justify-content: flex-end; gap: 12px; background: rgba(0, 0, 0, 0.15);
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      grid-column: 1 / -1;
-    }
-
-    .empty-state i {
-      font-size: 3rem;
-      margin-bottom: 14px;
-      color: #334155;
-    }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); grid-column: 1 / -1; }
+    .empty-state i { font-size: 3rem; margin-bottom: 14px; color: #334155; }
   </style>
 </head>
 <body>
@@ -551,6 +201,9 @@
         <i class="fa-solid fa-plus"></i>
         <span>افزودن فیلم</span>
       </button>
+      <button class="btn-icon" title="خروج از حالت مدیریت (پاک کردن رمز ذخیره‌شده)" onclick="logoutAdmin()">
+        <i class="fa-solid fa-lock"></i>
+      </button>
     </div>
   </header>
 
@@ -560,6 +213,10 @@
       <button class="tab-btn active" id="tabAll" onclick="switchTab('all')">
         <i class="fa-solid fa-layer-group"></i>
         <span>تمام فیلم‌ها</span>
+      </button>
+      <button class="tab-btn tab-top" id="tabTopTen" onclick="switchTab('top10')">
+        <i class="fa-solid fa-crown" style="color: var(--top-rating);"></i>
+        <span>فیلم‌های ۱۰ از ۱۰</span>
       </button>
       <button class="tab-btn" id="tabMine" onclick="switchTab('mine')">
         <i class="fa-solid fa-user"></i>
@@ -577,6 +234,13 @@
         <div class="stat-info">
           <div>عناوین در این بخش</div>
           <div id="statTotal">۰</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fa-solid fa-crown" style="color: var(--top-rating);"></i>
+        <div class="stat-info">
+          <div>شاهکارها (۱۰ از ۱۰)</div>
+          <div id="statTenCount">۰</div>
         </div>
       </div>
       <div class="stat-card">
@@ -631,7 +295,7 @@
 
   </div>
 
-  <!-- مودال ثبت اثر با دکمه اتصال به IMDb -->
+  <!-- مودال ثبت / ویرایش اثر -->
   <div class="modal-backdrop" id="movieModal">
     <div class="modal">
       <div class="modal-header">
@@ -680,7 +344,7 @@
           <div class="form-row">
             <div class="form-group">
               <label>امتیاز شخصی (از ۱۰)</label>
-              <input type="number" id="ratingInput" step="0.1" min="0" max="10" placeholder="مثال: 9.0">
+              <input type="number" id="ratingInput" step="0.1" min="0" max="10" placeholder="مثال: 10 یا 9.5">
             </div>
             <div class="form-group">
               <label>امتیاز رسمی IMDb</label>
@@ -707,10 +371,8 @@
   </div>
 
   <script>
-    // کلید فعال‌شده شما از سرویس OMDb
-    const OMDB_API_KEY = "ba5115ac"; 
+    const OMDB_API_KEY = "ba5115ac";
 
-    // اتصال به دیتابیس فایربیس (cinema-seyyed)
     const firebaseConfig = {
       apiKey: "AIzaSyBsu8JMHum33C-LUIZiTLO1v-D1qJJr1_Y",
       authDomain: "cinema-seyyed.firebaseapp.com",
@@ -721,16 +383,53 @@
       appId: "1:337880714768:web:d3e7cc2c5b14712614c495"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
     const moviesRef = db.ref('movies');
 
     let allMovies = [];
     let currentTab = 'all';
 
-    // استعلام مستقیم از API و تکمیل خودکار فرم
+    // رمز عبور بخش مدیریت (ثبت و ویرایش)
+    const ADMIN_PASSWORD = "007";
+    const AUTH_KEY = "cinema_admin_authed";
+
+    // بررسی رمز عبور با قابلیت حافظه (localStorage)
+    function checkAdminAuth() {
+      if (localStorage.getItem(AUTH_KEY) === "true") {
+        return true;
+      }
+      const pass = prompt("🔒 لطفاً رمز عبور را وارد کنید:");
+      if (pass === null) return false;
+      if (pass.trim() === ADMIN_PASSWORD) {
+        localStorage.setItem(AUTH_KEY, "true");
+        return true;
+      } else {
+        alert("⛔ رمز عبور اشتباه است!");
+        return false;
+      }
+    }
+
+    // خروج از حالت ادمین برای مواقع لازم
+    function logoutAdmin() {
+      if (localStorage.getItem(AUTH_KEY) === "true") {
+        localStorage.removeItem(AUTH_KEY);
+        alert("🔒 دسترسی مدیریت قفل شد. برای افزودن یا ویرایش بعدی باید دوباره رمز را وارد کنید.");
+      } else {
+        alert("سیستم در حال حاضر قفل است.");
+      }
+    }
+
+    function isPerfectTen(rating) {
+      const num = parseFloat(rating);
+      return !isNaN(num) && num === 10;
+    }
+
     async function fetchFromIMDb() {
-      const title = document.getElementById('movieTitleInput').value.trim();
+      const titleInput = document.getElementById('movieTitleInput');
+      const title = titleInput.value.trim();
       if (!title) {
         alert('لطفاً ابتدا نام فیلم را تایپ کنید.');
         return;
@@ -740,31 +439,33 @@
       btnText.innerText = 'در حال جستجو...';
 
       try {
-        const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`);
+        const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`;
+        const res = await fetch(url);
         const data = await res.json();
 
         if (data.Response === "True") {
-          document.getElementById('movieTitleInput').value = data.Title || title;
-          document.getElementById('directorInput').value = data.Director !== "N/A" ? data.Director : '';
-          document.getElementById('yearInput').value = parseInt(data.Year) || '';
-          document.getElementById('imdbInput').value = data.imdbRating !== "N/A" ? data.imdbRating : '';
+          titleInput.value = data.Title || title;
+          document.getElementById('directorInput').value = (data.Director && data.Director !== "N/A") ? data.Director : '';
+          document.getElementById('yearInput').value = data.Year ? parseInt(data.Year) : '';
+          document.getElementById('imdbInput').value = (data.imdbRating && data.imdbRating !== "N/A") ? data.imdbRating : '';
           
           if (data.Poster && data.Poster !== "N/A") {
             document.getElementById('posterInput').value = data.Poster.replace(/^http:\/\//i, 'https://');
           }
           
-          document.getElementById('notesInput').value = data.Plot !== "N/A" ? data.Plot : '';
+          document.getElementById('notesInput').value = (data.Plot && data.Plot !== "N/A") ? data.Plot : '';
         } else {
-          alert('فیلمی با این نام در IMDb پیدا نشد. نام انگلیسی آن را به شکل استاندارد وارد کنید.');
+          alert('فیلمی با این نام در IMDb یافت نشد: ' + (data.Error || 'نام انگلیسی دقیق را وارد کنید.'));
         }
       } catch (err) {
-        alert('خطا در برقراری ارتباط با دیتابیس IMDb.');
+        alert('خطا در ارتباط با سرور IMDb.');
         console.error(err);
       } finally {
         btnText.innerText = 'یافتن در IMDb';
       }
     }
 
+    // دریافت لحظه‌ای داده‌ها از فایربیس
     moviesRef.on('value', snapshot => {
       const data = snapshot.val();
       allMovies = [];
@@ -775,12 +476,21 @@
       }
       updateStats();
       filterMovies();
+    }, error => {
+      console.error("Firebase Error:", error);
+      document.getElementById('moviesContainer').innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i>
+          <p style="color: var(--danger); font-weight: bold;">خطای دسترسی به دیتابیس فایربیس</p>
+          <p style="font-size: 0.85rem; margin-top: 6px;">در بخش Realtime Database > Rules پروژه cinema-seyyed مقدار read و write را true بگذارید.</p>
+        </div>`;
     });
 
     function switchTab(tab) {
       currentTab = tab;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       if (tab === 'all') document.getElementById('tabAll').classList.add('active');
+      if (tab === 'top10') document.getElementById('tabTopTen').classList.add('active');
       if (tab === 'mine') document.getElementById('tabMine').classList.add('active');
       if (tab === 'friends') document.getElementById('tabFriends').classList.add('active');
       
@@ -790,7 +500,9 @@
 
     function updateStats() {
       let currentList = allMovies;
-      if (currentTab === 'mine') {
+      if (currentTab === 'top10') {
+        currentList = allMovies.filter(m => isPerfectTen(m.rating));
+      } else if (currentTab === 'mine') {
         currentList = allMovies.filter(m => !m.suggestedBy || m.suggestedBy.trim() === '');
       } else if (currentTab === 'friends') {
         currentList = allMovies.filter(m => m.suggestedBy && m.suggestedBy.trim() !== '');
@@ -799,9 +511,11 @@
       const total = currentList.length;
       const watched = currentList.filter(m => m.status === 'watched').length;
       const plan = total - watched;
+      const tenCount = allMovies.filter(m => isPerfectTen(m.rating)).length;
       const friendsCount = allMovies.filter(m => m.suggestedBy && m.suggestedBy.trim() !== '').length;
 
       document.getElementById('statTotal').innerText = total.toLocaleString('fa-IR');
+      document.getElementById('statTenCount').innerText = tenCount.toLocaleString('fa-IR');
       document.getElementById('statWatched').innerText = watched.toLocaleString('fa-IR');
       document.getElementById('statPlan').innerText = plan.toLocaleString('fa-IR');
       document.getElementById('statFriendsCount').innerText = friendsCount.toLocaleString('fa-IR');
@@ -813,6 +527,7 @@
       const sortBy = document.getElementById('sortSelect').value;
 
       let filtered = allMovies.filter(item => {
+        if (currentTab === 'top10' && !isPerfectTen(item.rating)) return false;
         if (currentTab === 'mine' && item.suggestedBy && item.suggestedBy.trim() !== '') return false;
         if (currentTab === 'friends' && (!item.suggestedBy || item.suggestedBy.trim() === '')) return false;
 
@@ -837,16 +552,23 @@
     function renderMovies(list) {
       const container = document.getElementById('moviesContainer');
       if (list.length === 0) {
+        let emptyMsg = 'هنوز اثری در این بخش ثبت نشده است.';
+        if (currentTab === 'top10') {
+          emptyMsg = 'هنوز هیچ فیلمی با امتیاز ۱۰ ثبت نشده است!';
+        }
         container.innerHTML = `
           <div class="empty-state">
             <i class="fa-solid fa-film"></i>
-            <p>اثری در این بخش یافت نشد.</p>
+            <p>${emptyMsg}</p>
+            <p style="font-size: 0.85rem; margin-top: 6px;">روی دکمه «افزودن فیلم» در بالا کلیک کنید.</p>
           </div>`;
         return;
       }
 
       container.innerHTML = list.map(item => {
         const isWatched = item.status === 'watched';
+        const isTen = isPerfectTen(item.rating);
+
         return `
           <div class="movie-card">
             <div class="poster-box">
@@ -857,6 +579,13 @@
               <div class="badge-status ${isWatched ? 'status-watched' : 'status-plan'}">
                 ${isWatched ? 'دیده‌شده' : 'در صف تماشا'}
               </div>
+
+              ${isTen ? `
+                <div class="badge-ten" title="شاهکار ۱۰ از ۱۰">
+                  <i class="fa-solid fa-crown"></i> 10 / 10
+                </div>
+              ` : ''}
+
               ${item.suggestedBy ? `
                 <div class="badge-friend" title="پیشنهاد شده توسط ${escapeHtml(item.suggestedBy)}">
                   <i class="fa-solid fa-user-tag"></i> ${escapeHtml(item.suggestedBy)}
@@ -873,7 +602,7 @@
               <div class="movie-meta">
                 <span>${item.year ? item.year : '—'}</span>
                 <div>
-                  ${item.rating ? `<span class="rating-badge"><i class="fa-solid fa-star"></i> ${item.rating}</span>` : ''}
+                  ${item.rating ? `<span class="rating-badge ${isTen ? 'is-perfect' : ''}"><i class="fa-solid fa-star"></i> ${item.rating}</span>` : ''}
                   ${item.imdbRating ? `<span style="color:#eab308; margin-right: 6px; font-size:0.75rem;">IMDb: ${item.imdbRating}</span>` : ''}
                 </div>
               </div>
@@ -896,10 +625,35 @@
       }).join('');
     }
 
+    // افزودن فیلم جدید با بررسی رمز و حافظه
     function openAddModal() {
+      if (!checkAdminAuth()) return;
+
       document.getElementById('movieForm').reset();
       document.getElementById('editKey').value = '';
       document.getElementById('modalTitle').innerText = 'ثبت فیلم جدید';
+      document.getElementById('movieModal').style.display = 'flex';
+    }
+
+    // ویرایش فیلم با بررسی رمز و حافظه
+    function editMovie(key) {
+      if (!checkAdminAuth()) return;
+
+      const item = allMovies.find(m => m.key === key);
+      if (!item) return;
+
+      document.getElementById('editKey').value = item.key;
+      document.getElementById('movieTitleInput').value = item.title || '';
+      document.getElementById('directorInput').value = item.director || '';
+      document.getElementById('yearInput').value = item.year || '';
+      document.getElementById('suggestedByInput').value = item.suggestedBy || '';
+      document.getElementById('ratingInput').value = item.rating || '';
+      document.getElementById('imdbInput').value = item.imdbRating || '';
+      document.getElementById('watchStatusInput').value = item.status || 'plan';
+      document.getElementById('posterInput').value = item.posterUrl || '';
+      document.getElementById('notesInput').value = item.notes || '';
+
+      document.getElementById('modalTitle').innerText = 'ویرایش اثر';
       document.getElementById('movieModal').style.display = 'flex';
     }
 
@@ -909,6 +663,7 @@
 
     function handleFormSubmit(e) {
       e.preventDefault();
+
       const key = document.getElementById('editKey').value;
 
       const movieData = {
@@ -930,25 +685,6 @@
         movieData.createdAt = Date.now();
         moviesRef.push(movieData).then(() => closeModal());
       }
-    }
-
-    function editMovie(key) {
-      const item = allMovies.find(m => m.key === key);
-      if (!item) return;
-
-      document.getElementById('editKey').value = item.key;
-      document.getElementById('movieTitleInput').value = item.title || '';
-      document.getElementById('directorInput').value = item.director || '';
-      document.getElementById('yearInput').value = item.year || '';
-      document.getElementById('suggestedByInput').value = item.suggestedBy || '';
-      document.getElementById('ratingInput').value = item.rating || '';
-      document.getElementById('imdbInput').value = item.imdbRating || '';
-      document.getElementById('watchStatusInput').value = item.status || 'plan';
-      document.getElementById('posterInput').value = item.posterUrl || '';
-      document.getElementById('notesInput').value = item.notes || '';
-
-      document.getElementById('modalTitle').innerText = 'ویرایش اثر';
-      document.getElementById('movieModal').style.display = 'flex';
     }
 
     function toggleStatus(key, currentStatus) {
@@ -979,3 +715,4 @@
   </script>
 </body>
 </html>
+```[cite: 1]
